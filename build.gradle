@@ -29,7 +29,8 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai-embedding'
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
