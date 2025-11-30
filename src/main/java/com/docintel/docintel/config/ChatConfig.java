@@ -129,6 +129,8 @@ public class ChatConfig {
     @Bean
     public VectorStore vectorStore(QdrantClient qdrantClient, EmbeddingModel embeddingModel) {
         return QdrantVectorStore.builder(qdrantClient, embeddingModel)
+                .initializeSchema(true)
+                .batchingStrategy(new TokenCountBatchingStrategy())
                 .build();
     }
 

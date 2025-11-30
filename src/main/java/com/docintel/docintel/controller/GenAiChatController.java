@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,9 +26,11 @@ public class GenAiChatController {
     private final ResponseHelper responseHelper;
     private final ChatClient chatClient;
     private final ChatMemory chatMemory;
+    private final VectorStore qdRantVectorStore;
 
     public GenAiChatController(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
-                               String systemPrompt, ResponseHelper responseHelper) {
+                               String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore) {
+        this.qdRantVectorStore = vectorStore;
         logger.info("Chat initialized with model: {}, prompt: {}",
                 chatModel.getDefaultOptions().getModel(), systemPrompt);
         this.responseHelper = responseHelper;
@@ -48,6 +52,7 @@ public class GenAiChatController {
 
         ChatClient.CallResponseSpec responseHolder = chatClient.prompt()
                 .user(message)
+                .advisors(QuestionAnswerAdvisor.builder(this.qdRantVectorStore).build())
                 .advisors(a -> a.param(CONVERSATION_ID, convId))
                 .call();
 
