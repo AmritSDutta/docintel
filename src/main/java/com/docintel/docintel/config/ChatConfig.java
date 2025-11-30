@@ -1,11 +1,22 @@
 package com.docintel.docintel.config;
 
 import com.google.genai.Client;
+import io.qdrant.client.QdrantClient;
+import io.qdrant.client.QdrantGrpcClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.google.genai.GoogleGenAiEmbeddingConnectionDetails;
 import org.springframework.ai.google.genai.common.GoogleGenAiSafetySetting;
+import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingModel;
+import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingModelName;
+import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingOptions;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -79,6 +90,46 @@ public class ChatConfig {
     @Bean
     public ChatMemory chatMemory() {
         return MessageWindowChatMemory.builder().maxMessages(60).build();
+    }
+
+    @Bean
+    public GoogleGenAiEmbeddingConnectionDetails googleGenAiEmbeddingConnectionDetails( @Value("${GEMINI_API_KEY}") String apiKey) {
+        return GoogleGenAiEmbeddingConnectionDetails.builder().apiKey(apiKey).build();
+    }
+
+    @Bean
+    public GoogleGenAiTextEmbeddingOptions googleGenAiTextEmbeddingOptions() {
+        return GoogleGenAiTextEmbeddingOptions.builder()
+                .model(GoogleGenAiTextEmbeddingModelName.TEXT_EMBEDDING_004.getName())
+                .taskType(GoogleGenAiTextEmbeddingOptions.TaskType.RETRIEVAL_DOCUMENT)
+                .dimensions(768)
+                .build();
+    }
+
+    @Bean
+    public EmbeddingModel embeddingModel(GoogleGenAiEmbeddingConnectionDetails googleGenAiEmbeddingConnectionDetails,
+                                         GoogleGenAiTextEmbeddingOptions googleGenAiTextEmbeddingOptions) {
+        return new GoogleGenAiTextEmbeddingModel(googleGenAiEmbeddingConnectionDetails,googleGenAiTextEmbeddingOptions);
+    }
+
+    @Bean
+    public QdrantClient qdrantClient(
+            @Value("${spring.ai.vectorstore.qdrant.host}") String host,
+            @Value("${spring.ai.vectorstore.qdrant.port}") int port,
+            @Value("${spring.ai.vectorstore.qdrant.api-key}") String apiKey
+    ) {
+        QdrantGrpcClient.Builder grpcClientBuilder =
+                QdrantGrpcClient.newBuilder(
+                        host, port, true,false);
+        grpcClientBuilder.withApiKey(apiKey);
+
+        return new QdrantClient(grpcClientBuilder.build());
+    }
+
+    @Bean
+    public VectorStore vectorStore(QdrantClient qdrantClient, EmbeddingModel embeddingModel) {
+        return QdrantVectorStore.builder(qdrantClient, embeddingModel)
+                .build();
     }
 
 }
