@@ -85,6 +85,13 @@ public class ResponseHelper {
         }
     }
 
+    /**
+     * Implements RelevancyEvaluator
+     * @param message
+     * @param chatResponse
+     * @param chatModel
+     * @return
+     */
     protected EvaluationResponse getEvaluationResponse(
             final String message,
             final ChatResponse chatResponse,

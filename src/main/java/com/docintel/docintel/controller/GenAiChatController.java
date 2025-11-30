@@ -61,8 +61,7 @@ public class GenAiChatController {
                 .call();
 
         ChatResponse chatResponse = responseHolder.chatResponse();
-        EvaluationResponse evaluationResponse = this.responseHelper.getEvaluationResponse(
-                message, chatResponse, this.chatModel);
+        EvaluationResponse evaluationResponse = this.responseHelper.getEvaluationResponse(message, chatResponse, this.chatModel);
         var text = this.responseHelper.getResponse(chatResponse);
         logger.info("conversation[{}] {}", convId, text);
         this.responseHelper.getUsageData(chatResponse);
