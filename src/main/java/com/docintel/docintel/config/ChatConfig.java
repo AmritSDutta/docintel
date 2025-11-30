@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.retry.support.RetryTemplateBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +28,17 @@ public class ChatConfig {
     }
 
     @Bean
-    public GoogleGenAiChatModel googleGenAiChatModel(Client genAiClient) {
+    public RetryTemplate retryTemplate() {
+        return new RetryTemplateBuilder()
+                .maxAttempts(3)
+                .exponentialBackoff(300, 2.0, 3000)
+                .retryOn(Exception.class)
+                .build();
+    }
+
+
+    @Bean
+    public GoogleGenAiChatModel googleGenAiChatModel(Client genAiClient, RetryTemplate retryTemplate) {
         var safety = List.of(
                 new GoogleGenAiSafetySetting(
                         GoogleGenAiSafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -60,6 +72,7 @@ public class ChatConfig {
                                 .model(GoogleGenAiChatModel.ChatModel.GEMINI_2_5_FLASH_LIGHT)
                                 .build()
                 )
+                .retryTemplate(retryTemplate)
                 .build();
     }
 
