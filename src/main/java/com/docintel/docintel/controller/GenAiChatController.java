@@ -7,6 +7,7 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,13 +25,16 @@ public class GenAiChatController {
     private static final Logger logger = LoggerFactory.getLogger(GenAiChatController.class);
 
     private final ResponseHelper responseHelper;
+    private final GoogleGenAiChatModel chatModel;
     private final ChatClient chatClient;
     private final ChatMemory chatMemory;
     private final VectorStore qdRantVectorStore;
 
     public GenAiChatController(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
-                               String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore) {
+                               String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore)
+                                {
         this.qdRantVectorStore = vectorStore;
+        this.chatModel =chatModel;
         logger.info("Chat initialized with model: {}, prompt: {}",
                 chatModel.getDefaultOptions().getModel(), systemPrompt);
         this.responseHelper = responseHelper;
@@ -57,10 +61,12 @@ public class GenAiChatController {
                 .call();
 
         ChatResponse chatResponse = responseHolder.chatResponse();
+        EvaluationResponse evaluationResponse = this.responseHelper.getEvaluationResponse(
+                message, chatResponse, this.chatModel);
         var text = this.responseHelper.getResponse(chatResponse);
         logger.info("conversation[{}] {}", convId, text);
         this.responseHelper.getUsageData(chatResponse);
-        return text;
+        return evaluationResponse != null ? text + "\nEvaluation: "+ evaluationResponse.toString() : text;
     }
 
 

@@ -11,6 +11,7 @@ based only on the provided retrieved context.
     2. Do NOT add unrelated background explanations.
     3. Use only information that appears in the retrieved context.
     4. Keep the answer focused, short, and directly responsive to the user query.
+    5. if available provide references.
     
     Return the answer first, followed by the quality object.
 

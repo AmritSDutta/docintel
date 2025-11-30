@@ -2,11 +2,17 @@ package com.docintel.docintel.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.evaluation.RelevancyEvaluator;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.evaluation.EvaluationRequest;
+import org.springframework.ai.evaluation.EvaluationResponse;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -79,4 +85,23 @@ public class ResponseHelper {
         }
     }
 
+    protected EvaluationResponse getEvaluationResponse(
+            final String message,
+            final ChatResponse chatResponse,
+            final GoogleGenAiChatModel chatModel) {
+        EvaluationResponse evaluationResponse = null;
+        if(chatResponse != null){
+            var retrievedDocs = chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
+            logger.info("retrieved documents for the user query: {}", retrievedDocs);
+            EvaluationRequest evaluationRequest = new EvaluationRequest(
+                    message,
+                    chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS),
+                    chatResponse.getResult().getOutput().getText()
+            );
+            RelevancyEvaluator evaluator = new RelevancyEvaluator(ChatClient.builder(chatModel));
+            evaluationResponse = evaluator.evaluate(evaluationRequest);
+            logger.info("evaluation data: {}", evaluationResponse);
+        }
+        return evaluationResponse;
+    }
 }
