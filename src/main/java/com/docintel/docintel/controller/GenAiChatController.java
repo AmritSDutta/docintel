@@ -33,7 +33,9 @@ public class GenAiChatController {
         this.chatMemory = chatMemory;
         this.chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(this.chatMemory).build())
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(this.chatMemory).build()
+                )
                 .build();
     }
 
