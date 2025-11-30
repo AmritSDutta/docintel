@@ -76,7 +76,7 @@ public class GenAiService {
     }
 
     public String extractFromPdf(File pdfFile) throws Exception {
-        logger.info("starting extraction");
+        logger.info("starting extraction {}", pdfFile.getName());
         byte[] pdfBytes = Files.readAllBytes(pdfFile.toPath());
 
         // Build a multimodal Content object (prompt + PDF)
@@ -113,7 +113,7 @@ public class GenAiService {
     }
 
     private List<Document> transformIntoDocument(String json, File pdfFile) throws JsonProcessingException {
-        logger.info("starting transform into document");
+        logger.info("starting transform into document {}", pdfFile.getName());
         // ---- Parse into Java objects ----
         final ObjectMapper mapper = new ObjectMapper();
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ingest/pdf")
@@ -30,8 +31,10 @@ public class IngestController {
 
     @PostMapping(value = "/genai", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> ingestDirectToGenAi(@RequestPart("file") MultipartFile file) throws Exception {
-        logger.info("received file: {}", file.getName());
-        File tmp = pdfService.saveToTemp(file);
+        var fileName = Optional.ofNullable(file.getOriginalFilename())
+                .orElse("uploaded.pdf");
+        logger.info("received file: {}", fileName);
+        File tmp = pdfService.saveToTemp(file, fileName);
         String json = genAiService.extractFromPdf(tmp);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
     }

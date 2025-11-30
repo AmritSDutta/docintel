@@ -1,8 +1,11 @@
 package com.docintel.docintel.service;
 
+import com.docintel.docintel.controller.GenAiChatController;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,18 +13,19 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PdfService {
+    private static final Logger logger = LoggerFactory.getLogger(PdfService.class);
 
-    public File saveToTemp(MultipartFile file) throws IOException {
-        File tmp = Files.createTempFile("upload-", ".pdf").toFile();
-        try (OutputStream os = new FileOutputStream(tmp)) {
-            os.write(file.getBytes());
-        }
-        return tmp;
+    public File saveToTemp(MultipartFile file, String fileName) throws IOException {
+        Path tmpDir = Files.createTempDirectory("pdf_ingest_");
+        Path fullPath = tmpDir.resolve(fileName);
+        Files.write(fullPath, file.getBytes());
+        return fullPath.toFile();
     }
 
     public List<byte[]> pdfToPngs(File pdf) throws Exception {
