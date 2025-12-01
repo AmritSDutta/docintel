@@ -56,45 +56,6 @@ public class ResponseHelper {
     }
 
     /**
-     * Read token-usage from the ChatResponse metadata, log it and return a formatted summary.
-     *
-     * @param chatResponse response returned by the model (may be null)
-     * @return formatted usage summary (never null)
-     */
-    protected String getUsageData(ChatResponse chatResponse) {
-        final var noUsage = "No usage metadata found.";
-        if (chatResponse == null) {
-            logger.info(noUsage);
-            return noUsage;
-        }
-
-        ChatResponseMetadata meta = chatResponse.getMetadata();
-        if (meta.getUsage() == null) {
-            logger.info(noUsage);
-            return noUsage;
-        }
-
-        Usage usage = meta.getUsage();
-        try {
-            // account for possible null Integer fields
-            int total = usage.getTotalTokens() != null ? usage.getTotalTokens() : 0;
-            int prompt = usage.getPromptTokens() != null ? usage.getPromptTokens() : 0;
-            int completion = usage.getCompletionTokens() != null ? usage.getCompletionTokens() : 0;
-
-            var summary = "Tokens — total: %d, prompt: %d, completion: %d"
-                    .formatted(total, prompt, completion);
-
-            logger.info(summary);
-            return summary;
-        } catch (Exception ex) {
-            logger.error("Error parsing usage metadata", ex);
-            String raw = "Raw usage: " + usage;
-            logger.info(raw);
-            return raw;
-        }
-    }
-
-    /**
      * Implements RelevancyEvaluator
      */
     protected EvaluationResponse getEvaluationResponse(

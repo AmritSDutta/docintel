@@ -43,8 +43,10 @@ public class GenAiChatController {
         logger.info("received request effective conversation: {}, user query: {}", convId, message);
 
         var response = this.genAiChatService.getRelevantInfoFromRag(message, convId);
-        logger.info("evaluated response[ {} ]:\n {}", convId, response);
-        return "Conversation:" + convId + "\nResponse:" + response;
+
+        var ls = System.lineSeparator();
+        logger.info("evaluated response[ {} ]:{} {}", convId,ls, response);
+        return "Response:" + response + ls.repeat(2) + "[Conversation Id]: " + convId;
     }
 
     @GetMapping("/ai/history")

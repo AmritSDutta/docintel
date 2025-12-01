@@ -157,13 +157,14 @@ public class ChatConfig {
     @Bean
     public SimpleLoggerAdvisor chatLoggerAdvisor() {
         Function<ChatClientRequest, String> requestToString = req -> {
-            var opts = req.prompt().getOptions();
-            return "modelOptions=" + (opts != null ? opts.toString() : "null");
+            assert req.prompt().getOptions() != null;
+            var model = req.prompt().getOptions().getModel();
+            return "modelOptions=" + (model != null ? model : "null");
         };
 
         Function<ChatResponse, String> responseToString = resp -> {
             var meta = resp.getMetadata();
-            return "metadata=" + meta.toString();
+            return "metadata=" + meta.getUsage().toString();
         };
 
         return new SimpleLoggerAdvisor(
