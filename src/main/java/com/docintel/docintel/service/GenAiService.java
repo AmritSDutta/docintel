@@ -26,50 +26,6 @@ public class GenAiService {
     private final Client genai;
     private final VectorStore qdRantVectorStore;
 
-    // PageExtraction object schema
-    static Schema pageSchema = Schema.builder()
-            .type("object")
-            .properties(Map.of(
-                    "page_number", Schema.builder().type("integer").build(),
-                    "extracted_tables", Schema.builder()
-                            .type("array")
-                            .nullable(true)
-                            .items(Schema.builder().type("string").nullable(true).build())
-                            .build(),
-                    "images", Schema.builder()
-                            .type("array")
-                            .nullable(true)
-                            .items(
-                                    Schema.builder()
-                                            .type("object")
-                                            .properties(Map.of(
-                                                    "caption", Schema.builder().type("string").nullable(true).build(),
-                                                    "source", Schema.builder().type("string").nullable(true).build()
-                                            ))
-                                            .build()
-                            ).build(),
-                    "json_blocks", Schema.builder()
-                            .type("array")
-                            .nullable(true)
-                            .items(
-                                    Schema.builder()
-                                            .type("object")
-                                            .properties(Map.of(
-                                                    "content", Schema.builder()
-                                                            .type("object")
-                                                            .properties(Map.of("raw", Schema.builder().type("string").nullable(true).build()))
-                                                            .build()
-                                            ))
-                                            .build()
-                            ).build(),
-                    "text_content", Schema.builder().type("string").nullable(true).build()
-            ))
-            .required(List.of("page_number"))
-            .build();
-
-    // Array schema (list of PageExtraction)
-    public static final Schema PAGE_ARRAY_SCHEMA = Schema.builder().type("array").items(pageSchema).build();
-
     public GenAiService(Client genAiClient, VectorStore vectorStore) {
         this.genai = genAiClient;
         this.qdRantVectorStore = vectorStore;
@@ -97,7 +53,7 @@ public class GenAiService {
         GenerateContentConfig config =
                 GenerateContentConfig.builder()
                         .responseMimeType("application/json")
-                        .responseSchema(PAGE_ARRAY_SCHEMA)
+                        .responseSchema(SchemaBuildingHelper.getGenAiSchemaForExtractedPage())
                         .build();
 
         GenerateContentResponse response =
