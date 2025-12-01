@@ -55,6 +55,13 @@ public class ChatConfig {
                 .build();
     }
 
+    @Bean
+    public Client genAiClient(
+            @Value("${GEMINI_API_KEY:}") String apiKey
+    ) {
+        return Client.builder().apiKey(apiKey).build();
+    }
+
 
     @Bean
     public GoogleGenAiChatModel googleGenAiChatModel(Client genAiClient, RetryTemplate retryTemplate) {
