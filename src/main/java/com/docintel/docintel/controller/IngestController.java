@@ -1,6 +1,6 @@
 package com.docintel.docintel.controller;
 
-import com.docintel.docintel.service.GenAiService;
+import com.docintel.docintel.service.GenAiIMultiModalIngestionService;
 import com.docintel.docintel.service.PdfService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +21,12 @@ public class IngestController {
     private static final Logger logger = LoggerFactory.getLogger(IngestController.class);
 
     private final PdfService pdfService;
-    private final GenAiService genAiService;
+    private final GenAiIMultiModalIngestionService genAiIMultiModalIngestionService;
 
     public IngestController(PdfService pdfService,
-                               GenAiService genAiService) {
+                               GenAiIMultiModalIngestionService genAiIMultiModalIngestionService) {
         this.pdfService = pdfService;
-        this.genAiService = genAiService;
+        this.genAiIMultiModalIngestionService = genAiIMultiModalIngestionService;
     }
 
     @PostMapping(value = "/genai", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -35,7 +35,7 @@ public class IngestController {
                 .orElse("uploaded.pdf");
         logger.info("received file: {}", fileName);
         File tmp = pdfService.saveToTemp(file, fileName);
-        String json = genAiService.extractFromPdf(tmp);
+        String json = genAiIMultiModalIngestionService.extractFromPdf(tmp);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
     }
 

@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class GenAiService {
-    private static final Logger logger = LoggerFactory.getLogger(GenAiService.class);
+public class GenAiIMultiModalIngestionService {
+    private static final Logger logger = LoggerFactory.getLogger(GenAiIMultiModalIngestionService.class);
 
     private final Client genai;
     private final VectorStore qdRantVectorStore;
 
-    public GenAiService(Client genAiClient, VectorStore vectorStore) {
+    public GenAiIMultiModalIngestionService(Client genAiClient, VectorStore vectorStore) {
         this.genai = genAiClient;
         this.qdRantVectorStore = vectorStore;
     }
@@ -70,13 +70,11 @@ public class GenAiService {
 
     private List<Document> transformIntoDocument(String json, File pdfFile) throws JsonProcessingException {
         logger.info("starting transform into document {}", pdfFile.getName());
-        // ---- Parse into Java objects ----
         final ObjectMapper mapper = new ObjectMapper();
 
-        List<PageExtraction> pages =
-                mapper.readValue(json, new TypeReference<List<PageExtraction>>() {});
+        List<PageExtraction> pages = mapper.readValue(json, new TypeReference<>() {});
 
-        // ---- Convert each page into a Document and store into Qdrant ----
+        /* Convert each page into a Document  */
         List<Document> docs = new ArrayList<>();
 
         for (PageExtraction p : pages) {
