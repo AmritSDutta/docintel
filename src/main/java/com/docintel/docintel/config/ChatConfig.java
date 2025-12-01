@@ -21,6 +21,7 @@ import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingOptions;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -184,6 +185,13 @@ public class ChatConfig {
             OpenAiChatModel openAiModel,
             SimpleLoggerAdvisor chatLoggerAdvisor) {
         return ChatClient.builder(openAiModel).defaultAdvisors(chatLoggerAdvisor);
+    }
+
+    @Bean
+    public TokenTextSplitter tokenTextSplitter() {
+        return TokenTextSplitter.builder()
+                .withChunkSize(250)
+                .build();
     }
 
 
