@@ -8,8 +8,9 @@ A compact **Spring Boot + Spring AI 1.1** microservice that ingests PDFs, extrac
 ## 🌟 Highlights
 - **PDF ingestion only** (tested)
 - Multimodal extraction via `gemini-2.5-flash-lite`
-- Embeddings with `text-embedding-004` (256-dim)
+- Embeddings with `text-embedding-004` (768-dim)
 - Vector store: **Qdrant** (via Spring AI auto-config)
+- Evaluation by `gpt-5-nano`
 - Retrieval → Generation → Evaluation (Relevancy + Fact-checking)
 - Grounded answers with page references
 
