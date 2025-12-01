@@ -190,7 +190,7 @@ public class ChatConfig {
     @Bean
     public TokenTextSplitter tokenTextSplitter() {
         return TokenTextSplitter.builder()
-                .withChunkSize(250)
+                .withChunkSize(800)
                 .build();
     }
 
