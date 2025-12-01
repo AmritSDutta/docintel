@@ -1,5 +1,6 @@
 package com.docintel.docintel.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -15,6 +16,7 @@ import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import static org.springframework.ai.model.ModelOptionsUtils.OBJECT_MAPPER;
 
 @Component
 public class ResponseHelper {
@@ -87,10 +89,6 @@ public class ResponseHelper {
 
     /**
      * Implements RelevancyEvaluator
-     * @param message
-     * @param chatResponse
-     * @param chatModel
-     * @return
      */
     protected EvaluationResponse getEvaluationResponse(
             final String message,
@@ -99,7 +97,13 @@ public class ResponseHelper {
         EvaluationResponse evaluationResponse = null;
         if(chatResponse != null){
             var retrievedDocs = chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
-            logger.info("retrieved documents for the user query: {}", retrievedDocs);
+            try {
+                logger.info("retrieved documents for the user query: {}",
+                        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(retrievedDocs));
+            } catch (JsonProcessingException e) {
+                logger.info("documents for the user query: {}", retrievedDocs);
+                logger.error("JsonProcessingException", e);
+            }
             EvaluationRequest evaluationRequest = new EvaluationRequest(
                     message,
                     chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS),

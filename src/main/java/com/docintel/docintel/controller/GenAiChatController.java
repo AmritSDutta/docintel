@@ -9,6 +9,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,7 @@ public class GenAiChatController {
     private final ChatClient chatClient;
     private final ChatMemory chatMemory;
     private final VectorStore qdRantVectorStore;
+    private final QuestionAnswerAdvisor qaAdvisor;
 
     public GenAiChatController(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
                                String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore)
@@ -45,6 +47,16 @@ public class GenAiChatController {
                         MessageChatMemoryAdvisor.builder(this.chatMemory).build()
                 )
                 .build();
+
+        this.qaAdvisor = QuestionAnswerAdvisor
+                .builder(this.qdRantVectorStore)
+                .searchRequest(
+                        SearchRequest.builder()
+                                .topK(3)
+                                .similarityThreshold(0.35)
+                                .build()
+                ).order(5) // among others advisor when it will act
+                .build();
     }
 
     @GetMapping("/ai/chat")
@@ -55,8 +67,8 @@ public class GenAiChatController {
                 .orElse(UUID.randomUUID().toString().split("-")[0]);
 
         ChatClient.CallResponseSpec responseHolder = chatClient.prompt()
-                .user(message)
-                .advisors(QuestionAnswerAdvisor.builder(this.qdRantVectorStore).build())
+                .user(message + "\nProvide references wherever available.")
+                .advisors(this.qaAdvisor)
                 .advisors(a -> a.param(CONVERSATION_ID, convId))
                 .call();
 
@@ -66,7 +78,7 @@ public class GenAiChatController {
         var text = this.responseHelper.getResponse(chatResponse);
         logger.info("conversation[{}] {}", convId, text);
         this.responseHelper.getUsageData(chatResponse);
-        return evaluationResponse != null ? text + "\nEvaluation: "+ evaluationResponse.toString() : text;
+        return evaluationResponse != null ? text + "\n\nEvaluation: "+ evaluationResponse : text;
     }
 
 
