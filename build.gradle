@@ -34,7 +34,8 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "org.mockito:mockito-inline:5.2.0"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
@@ -45,4 +46,14 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+
+    doFirst {
+        def mockitoJar = configurations.testRuntimeClasspath.find {
+            it.name.startsWith("mockito-core")
+        }
+
+        if (mockitoJar != null) {
+            jvmArgs += "-javaagent:${mockitoJar.absolutePath}"
+        }
+    }
 }
