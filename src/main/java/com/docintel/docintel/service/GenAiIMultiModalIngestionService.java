@@ -8,6 +8,7 @@ import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import com.google.genai.types.GenerateContentResponseUsageMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
@@ -63,11 +64,17 @@ public class GenAiIMultiModalIngestionService {
 
         List<Document> docs = transformIntoDocument(response.text(), pdfFile);
         logger.info("Number of docs extracted: {}", docs.size());
+        reportUsage(response);
 
         logger.info(this.qdRantVectorStore.getName());
         this.qdRantVectorStore.add(docs);
         logger.info("inserted into qdrant");
         return response.text();
+    }
+
+    private static void reportUsage(GenerateContentResponse response) {
+        response.usageMetadata().flatMap(GenerateContentResponseUsageMetadata::totalTokenCount)
+                .ifPresent(t -> logger.info("total token used in extraction: {}", t));
     }
 
     private List<Document> transformIntoDocument(String json, File pdfFile) throws JsonProcessingException {

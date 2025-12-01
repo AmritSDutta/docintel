@@ -57,7 +57,7 @@ public class ChatConfig {
 
     @Bean
     public Client genAiClient(
-            @Value("${GEMINI_API_KEY:}") String apiKey
+            @Value("${spring.ai.google.genai.api-key}") String apiKey
     ) {
         return Client.builder().apiKey(apiKey).build();
     }
