@@ -1,34 +1,80 @@
-# docintel
-RAG evaluation in a Spring Boot Microservice
+# 📄 DocIntel-Lite for Spring AI (PDF-only edition)
 
+A compact **Spring Boot + Spring AI 1.1** microservice that ingests PDFs, extracts multimodal content with Gemini, embeds text, stores vectors in **Qdrant**, retrieves context, generates LLM answers, and auto-evaluates them with an LLM-as-judge.  
+*(Small, focused, and surprisingly sassy.)* 🤖✨
 
-“DocIntel-Lite for Spring AI”
-(Full RAG + Evaluation in a Spring Boot Microservice)
+---
 
-Flow
+## 🌟 Highlights
+- **PDF ingestion only** (tested)
+- Multimodal extraction via `gemini-2.5-flash-lite`
+- Embeddings with `text-embedding-004` (256-dim)
+- Vector store: **Qdrant** (via Spring AI auto-config)
+- Retrieval → Generation → Evaluation (Relevancy + Fact-checking)
+- Grounded answers with page references
 
-Ingest: Upload PDF/HTML → extract plain text via a simple parser.
+---
 
-Embed: Use Spring AI embeddings (OpenAI / Google / Ollama).
+## 🏗️ Architecture (Spring-themed)
+### DocIntel-Lite Architecture
 
-Retrieve: Vector-store abstraction (PgVector / Elastic / in-memory).
+Components (with Spring vibes):
+- **PDF Upload** → page-wise vision extraction (Gemini)
+- **Embedding** (text-embedding-004) → vectors stored in **Qdrant**
+- **Retrieval** via Spring AI VectorStore abstraction
+- **Generation** with Gemini; **Evaluation** with GPT-5-nano (LLM-as-Judge)
+- Telemetry: token usage, latency, evaluation scores
 
-Generate: LLM answers via Spring AI ChatClient.
+---
 
-Evaluate:
+## 🚀 Quick Start (Docker)
 
-RelevancyEvaluator (Spring AI built-in)
+Build the image:
+```bash
+docker build -t docintel .
+```
 
-FactCheckingEvaluator
+Run the container (example):
+```bash
+docker run -p 8080:8080   -e GEMINI_API_KEY=<KEY>   -e OPENAI_API_KEY=<KEY>   -e QDRANT_HOST=<HOST>   -e QDRANT_API_KEY=<KEY>   docintel
+```
 
-Add LLM-as-Judge using Recursive Advisors → regenerate answer if evaluation < threshold.
+You should see startup logs including `DocIntel Multi-Modal RAG, by Amrit` and Tomcat on port 8080.
 
-Why showcase-worthy
+---
 
-End-to-end architecture
+## 📥 API (short)
+- `POST /ingest/pdf` — multipart form upload: file parameter (PDF). Ingests, extracts, chunks, embeds, upserts to Qdrant.
+- `POST /chat` — body: `{ "conversationId": "<id>", "query": "<your question>" }`. Returns grounded answer + evaluation object.
 
-Tight integration with Spring AI 1.1
+---
 
-Demonstrates automated quality control
+## ✅ What was tested
+- PDF ingestion → extraction → embedding → qdrant upsert
+- Retrieval + two-stage model generation (Gemini → GPT-5-nano)
+- Evaluators returning `pass=true` with references (Page X)
+- Token telemetry logged
 
-Perfect portfolio piece for GenAI Architect roles.
+> Note: Only PDFs have been validated. HTML/DOCX support is not included in this release.
+
+---
+
+## 🔧 Recommendations (quick)
+- Tune Qdrant collection (dim=256, distance metric) and batching (100–500)
+- Add evaluator negative test cases and configurable score threshold (e.g., 0.8)
+- Consider conditional model orchestration (vision model for extraction; single synth model where possible)
+- Add cost telemetry and per-conversation token caps
+
+---
+
+## 📚 References
+- Spring AI 1.1 docs
+- Qdrant best practices
+- Google Generative AI model docs
+
+---
+
+## 🧾 License
+MIT — do what you want, but please credit the intern (that’s the code) who never asks for coffee. ☕
+
+---
