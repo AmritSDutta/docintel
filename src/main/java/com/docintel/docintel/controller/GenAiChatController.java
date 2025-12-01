@@ -45,7 +45,7 @@ public class GenAiChatController {
         var response = this.genAiChatService.getRelevantInfoFromRag(message, convId);
 
         var ls = System.lineSeparator();
-        logger.info("evaluated response[ {} ]:{} {}", convId,ls, response);
+        logger.info("evaluated response[ {} ]:{} {}", convId, ls, response);
         return "Response:" + response + ls.repeat(2) + "[Conversation Id]: " + convId;
     }
 

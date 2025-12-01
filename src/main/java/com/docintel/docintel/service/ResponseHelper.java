@@ -7,8 +7,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.evaluation.RelevancyEvaluator;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.metadata.ChatResponseMetadata;
-import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.evaluation.EvaluationRequest;
@@ -30,6 +28,7 @@ public class ResponseHelper {
     private ChatClient.Builder openAiChatClientBuilder;
 
     private static RelevancyEvaluator evaluator;
+
     /**
      * Safely extract the assistant text from a ChatResponse.
      *

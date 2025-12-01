@@ -64,7 +64,7 @@ public class GenAiChatService {
                 this.responseHelper.getEvaluationResponse(message, chatResponse, this.chatModel);
         var text = this.responseHelper.getResponse(chatResponse);
 
-        logger.info("{}{}conversation Id:[{}]",text, System.lineSeparator(), convId);
+        logger.info("{}{}conversation Id:[{}]", text, System.lineSeparator(), convId);
         var ls = System.lineSeparator();
         return evaluationResponse == null
                 ? text
