@@ -1,4 +1,4 @@
-package com.docintel.docintel.controller;
+package com.docintel.docintel.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
