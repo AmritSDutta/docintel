@@ -27,13 +27,19 @@ public class GenAiChatController {
         this.chatMemory = chatMemory;
     }
 
-    @GetMapping("/ai/chat")
-    String generation(@RequestParam String message, @RequestParam(required = false, defaultValue = "5z65c1d8") String conversationId) {
-
-        logger.info("received request conversation: {}", conversationId);
-        var convId = Optional.ofNullable(conversationId)
+    private static String getOrCreateConversationId(String conversationId) {
+        return Optional.ofNullable(conversationId)
                 .filter(id -> !id.isBlank())
                 .orElse(UUID.randomUUID().toString().split("-")[0]);
+    }
+
+    @GetMapping("/ai/chat")
+    String generation(
+            @RequestParam String message,
+            @RequestParam(required = false, defaultValue = "5z65c1d8") String conversationId) {
+
+        logger.info("received request conversation: {}", conversationId);
+        var convId = getOrCreateConversationId(conversationId);
         logger.info("received request effective conversation: {}, user query: {}", convId, message);
 
         var response = this.genAiChatService.getRelevantInfoFromRag(message, convId);
@@ -46,7 +52,6 @@ public class GenAiChatController {
         logger.info("fetching conversation history : {}", conversationId);
         return chatMemory.get(conversationId);
     }
-
 
     @DeleteMapping("/ai/cleanse")
     public void deleteConversation(@RequestParam String conversationId) {
