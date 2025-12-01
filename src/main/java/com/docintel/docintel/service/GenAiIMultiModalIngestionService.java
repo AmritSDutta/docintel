@@ -48,6 +48,7 @@ public class GenAiIMultiModalIngestionService {
                         2. Detect images/charts/diagrams and produce detailed captions.
                         3. Extract any JSON blocks and output valid JSON.
                         4. extract all texts and output a valid json.
+                        5. Identify and extract any OCR-like or machine-read text blocks verbatim and output a valid json.
                         Return strict JSON matching the provided schema.
                         """),
                 Part.fromBytes(pdfBytes, "application/pdf")
