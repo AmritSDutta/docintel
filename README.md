@@ -44,11 +44,31 @@ You should see startup logs including `DocIntel Multi-Modal RAG, by Amrit` and T
 ---
 
 ## 📥 API (short)
-- `POST /ingest/pdf` — multipart form upload: file parameter (PDF). Ingests, extracts, chunks, embeds, upserts to Qdrant.
-- `POST /chat` — body: `{ "conversationId": "<id>", "query": "<your question>" }`. Returns grounded answer + evaluation object.
+- `POST /ingest/pdf/genai` — multipart form upload: file parameter (PDF). Ingests, extracts, chunks, embeds, upserts to Qdrant.
+- `POST /ai/chat` — body: `{ "conversationId": "<id>", "query": "<your question>" }`. Returns grounded answer + evaluation object.
 
 ---
+## 🤖 Sample chat response
 
+- 🔍 Query: what does Sample Chart Figure suggest ?
+
+
+- 💬 Response:
+  - The Sample Chart Figure suggests a data series that begins around x=1.00,
+      decreases to a minimum around x=2.00, and then increases by x=3.00.
+      The specific values mentioned are:
+
+      *   Starting around 2.8 to 3.25 at x=1.00.
+      *   Decreasing to a minimum of approximately 1.2 to 1.5 at x=2.00.
+      *   Increasing to approximately 3.7 to 3.8 at x=3.00.
+
+    References: Page 3
+
+    Evaluation:
+    - EvaluationResponse{pass=true, score=1.0, feedback='', metadata={}}
+
+[Conversation Id]: 5z65c1d8
+---
 ## ✅ What was tested
 - PDF ingestion → extraction → embedding → qdrant upsert
 - Retrieval + two-stage model generation (Gemini → GPT-5-nano)
