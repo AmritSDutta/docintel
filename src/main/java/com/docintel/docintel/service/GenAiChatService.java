@@ -26,9 +26,8 @@ public class GenAiChatService {
     private final QuestionAnswerAdvisor qaAdvisor;
 
     public GenAiChatService(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
-                            String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore)
-    {
-        this.chatModel =chatModel;
+                            String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore) {
+        this.chatModel = chatModel;
         logger.info("Chat initialized with model: {}, prompt: {}",
                 chatModel.getDefaultOptions().getModel(), systemPrompt);
         this.responseHelper = responseHelper;

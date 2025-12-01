@@ -16,6 +16,7 @@ import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 import static org.springframework.ai.model.ModelOptionsUtils.OBJECT_MAPPER;
 
 @Component
@@ -95,7 +96,7 @@ public class ResponseHelper {
             final ChatResponse chatResponse,
             final GoogleGenAiChatModel chatModel) {
         EvaluationResponse evaluationResponse = null;
-        if(chatResponse != null){
+        if (chatResponse != null) {
             var retrievedDocs = chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
             try {
                 logger.info("retrieved documents for the user query: {}",

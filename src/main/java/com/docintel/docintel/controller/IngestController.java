@@ -24,7 +24,7 @@ public class IngestController {
     private final GenAiIMultiModalIngestionService genAiIMultiModalIngestionService;
 
     public IngestController(PdfService pdfService,
-                               GenAiIMultiModalIngestionService genAiIMultiModalIngestionService) {
+                            GenAiIMultiModalIngestionService genAiIMultiModalIngestionService) {
         this.pdfService = pdfService;
         this.genAiIMultiModalIngestionService = genAiIMultiModalIngestionService;
     }
@@ -36,6 +36,7 @@ public class IngestController {
         logger.info("received file: {}", fileName);
         File tmp = pdfService.saveToTemp(file, fileName);
         String json = genAiIMultiModalIngestionService.extractFromPdf(tmp);
+        logger.info("ingestion completed");
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
     }
 

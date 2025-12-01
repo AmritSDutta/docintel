@@ -93,7 +93,7 @@ public class ChatConfig {
     }
 
     @Bean
-    public GoogleGenAiEmbeddingConnectionDetails googleGenAiEmbeddingConnectionDetails( @Value("${GEMINI_API_KEY}") String apiKey) {
+    public GoogleGenAiEmbeddingConnectionDetails googleGenAiEmbeddingConnectionDetails(@Value("${GEMINI_API_KEY}") String apiKey) {
         return GoogleGenAiEmbeddingConnectionDetails.builder().apiKey(apiKey).build();
     }
 
@@ -109,7 +109,7 @@ public class ChatConfig {
     @Bean
     public EmbeddingModel embeddingModel(GoogleGenAiEmbeddingConnectionDetails googleGenAiEmbeddingConnectionDetails,
                                          GoogleGenAiTextEmbeddingOptions googleGenAiTextEmbeddingOptions) {
-        return new GoogleGenAiTextEmbeddingModel(googleGenAiEmbeddingConnectionDetails,googleGenAiTextEmbeddingOptions);
+        return new GoogleGenAiTextEmbeddingModel(googleGenAiEmbeddingConnectionDetails, googleGenAiTextEmbeddingOptions);
     }
 
     @Bean
@@ -120,7 +120,7 @@ public class ChatConfig {
     ) {
         QdrantGrpcClient.Builder grpcClientBuilder =
                 QdrantGrpcClient.newBuilder(
-                        host, port, true,false);
+                        host, port, true, false);
         grpcClientBuilder.withApiKey(apiKey);
 
         return new QdrantClient(grpcClientBuilder.build());

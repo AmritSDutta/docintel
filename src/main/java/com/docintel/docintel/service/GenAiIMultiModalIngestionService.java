@@ -4,16 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
-import com.google.genai.types.*;
-
+import com.google.genai.types.Content;
+import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
+import com.google.genai.types.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +59,7 @@ public class GenAiIMultiModalIngestionService {
                         .build();
 
         GenerateContentResponse response =
-                this.genai.models.generateContent("gemini-2.5-flash", request, config );
+                this.genai.models.generateContent("gemini-2.5-flash", request, config);
 
         List<Document> docs = transformIntoDocument(response.text(), pdfFile);
         logger.info("Number of docs extracted: {}", docs.size());
@@ -72,7 +74,8 @@ public class GenAiIMultiModalIngestionService {
         logger.info("starting transform into document {}", pdfFile.getName());
         final ObjectMapper mapper = new ObjectMapper();
 
-        List<PageExtraction> pages = mapper.readValue(json, new TypeReference<>() {});
+        List<PageExtraction> pages = mapper.readValue(json, new TypeReference<>() {
+        });
 
         /* Convert each page into a Document  */
         List<Document> docs = new ArrayList<>();
@@ -94,7 +97,7 @@ public class GenAiIMultiModalIngestionService {
                 metadata.put("images", p.images);
 
                 sb.append("Images:\n");
-                for (Map<String,Object> img : p.images) {
+                for (Map<String, Object> img : p.images) {
                     Object caption = img.get("caption");
                     if (caption != null) sb.append("Caption: ").append(caption).append("\n");
                 }

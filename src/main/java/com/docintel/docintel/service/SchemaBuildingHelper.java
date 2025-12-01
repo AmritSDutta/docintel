@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class SchemaBuildingHelper {
 
-    public static Schema getGenAiSchemaForExtractedPage(){
+    public static Schema getGenAiSchemaForExtractedPage() {
 
         // PageExtraction object schema
         Schema pageSchema = Schema.builder()
