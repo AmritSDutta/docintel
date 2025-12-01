@@ -3,8 +3,12 @@ package com.docintel.docintel.config;
 import com.google.genai.Client;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.QdrantGrpcClient;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
@@ -14,6 +18,9 @@ import org.springframework.ai.google.genai.common.GoogleGenAiSafetySetting;
 import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingModel;
 import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingModelName;
 import org.springframework.ai.google.genai.text.GoogleGenAiTextEmbeddingOptions;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +34,7 @@ import org.springframework.retry.support.RetryTemplateBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Function;
 
 @Configuration
 public class ChatConfig {
@@ -133,6 +141,43 @@ public class ChatConfig {
                 .batchingStrategy(new TokenCountBatchingStrategy())
                 .build();
     }
+
+    @Bean
+    public OpenAiChatModel openAiChatModel(OpenAiApi openAiApi, RetryTemplate retryTemplate) {
+        return OpenAiChatModel.builder()
+                .openAiApi(openAiApi)
+                .defaultOptions(
+                        OpenAiChatOptions.builder()
+                                .model(OpenAiApi.ChatModel.GPT_5_NANO)
+                                .build())
+                .retryTemplate(retryTemplate)
+                .build();
+    }
+
+    @Bean
+    public SimpleLoggerAdvisor chatLoggerAdvisor() {
+        Function<ChatClientRequest, String> requestToString = req -> {
+            var opts = req.prompt().getOptions();
+            return "modelOptions=" + (opts != null ? opts.toString() : "null");
+        };
+
+        Function<ChatResponse, String> responseToString = resp -> {
+            var meta = resp.getMetadata();
+            return "metadata=" + meta.toString();
+        };
+
+        return new SimpleLoggerAdvisor(
+                requestToString,
+                responseToString, 0);
+    }
+
+    @Bean
+    public ChatClient.Builder openAiChatClientBuilder(
+            OpenAiChatModel openAiModel,
+            SimpleLoggerAdvisor chatLoggerAdvisor) {
+        return ChatClient.builder(openAiModel).defaultAdvisors(chatLoggerAdvisor);
+    }
+
 
 }
 

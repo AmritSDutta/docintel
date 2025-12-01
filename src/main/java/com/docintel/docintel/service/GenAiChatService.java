@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -26,7 +27,8 @@ public class GenAiChatService {
     private final QuestionAnswerAdvisor qaAdvisor;
 
     public GenAiChatService(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
-                            String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore) {
+                            String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore,
+                            SimpleLoggerAdvisor chatLoggerAdvisor) {
         this.chatModel = chatModel;
         logger.info("Chat initialized with model: {}, prompt: {}",
                 chatModel.getDefaultOptions().getModel(), systemPrompt);
@@ -36,6 +38,7 @@ public class GenAiChatService {
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build()
                 )
+                .defaultAdvisors(chatLoggerAdvisor)
                 .build();
 
         this.qaAdvisor = QuestionAnswerAdvisor
@@ -60,7 +63,7 @@ public class GenAiChatService {
         EvaluationResponse evaluationResponse =
                 this.responseHelper.getEvaluationResponse(message, chatResponse, this.chatModel);
         var text = this.responseHelper.getResponse(chatResponse);
-        logger.info("conversation[{}] {}", convId, text);
+        logger.info("{},\n conversation Id:[{}] ",text, convId);
         this.responseHelper.getUsageData(chatResponse);
         return evaluationResponse != null ? text + "\n\nEvaluation: " + evaluationResponse : text;
     }

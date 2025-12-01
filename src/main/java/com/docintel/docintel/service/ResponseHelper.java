@@ -14,6 +14,8 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.evaluation.EvaluationRequest;
 import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -23,7 +25,11 @@ import static org.springframework.ai.model.ModelOptionsUtils.OBJECT_MAPPER;
 public class ResponseHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseHelper.class);
+    @Autowired
+    @Qualifier("openAiChatClientBuilder")
+    private ChatClient.Builder openAiChatClientBuilder;
 
+    private static RelevancyEvaluator evaluator;
     /**
      * Safely extract the assistant text from a ChatResponse.
      *
@@ -99,10 +105,10 @@ public class ResponseHelper {
         if (chatResponse != null) {
             var retrievedDocs = chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
             try {
-                logger.info("retrieved documents for the user query: {}",
+                logger.trace("retrieved documents for the user query: {}",
                         OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(retrievedDocs));
             } catch (JsonProcessingException e) {
-                logger.info("documents for the user query: {}", retrievedDocs);
+                logger.trace("documents for the user query: {}", retrievedDocs);
                 logger.error("JsonProcessingException", e);
             }
             EvaluationRequest evaluationRequest = new EvaluationRequest(
@@ -110,7 +116,7 @@ public class ResponseHelper {
                     chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS),
                     chatResponse.getResult().getOutput().getText()
             );
-            RelevancyEvaluator evaluator = new RelevancyEvaluator(ChatClient.builder(chatModel));
+            RelevancyEvaluator evaluator = new RelevancyEvaluator(openAiChatClientBuilder);
             evaluationResponse = evaluator.evaluate(evaluationRequest);
             logger.info("evaluation data: {}", evaluationResponse);
         }
