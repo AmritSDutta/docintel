@@ -60,14 +60,12 @@ public class GenAiChatService {
                 .call();
 
         ChatResponse chatResponse = responseHolder.chatResponse();
-        EvaluationResponse evaluationResponse =
-                this.responseHelper.getEvaluationResponse(message, chatResponse, this.chatModel);
-        var text = this.responseHelper.getResponse(chatResponse);
+        EvaluationResponse customEvaluation =
+                this.responseHelper.getCustomEvaluation(message, chatResponse);
 
+        var text = this.responseHelper.getResponse(chatResponse);
         logger.info("{}{}conversation Id:[{}]", text, System.lineSeparator(), convId);
         var ls = System.lineSeparator();
-        return evaluationResponse == null
-                ? text
-                : text + ls.repeat(2) + "Evaluation:" + ls + evaluationResponse;
+        return text + ls.repeat(2) + "Evaluation:" + ls + customEvaluation;
     }
 }

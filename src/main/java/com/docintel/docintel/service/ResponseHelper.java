@@ -1,14 +1,17 @@
 package com.docintel.docintel.service;
 
+import com.docintel.docintel.evaluator.GroundedRelevantEvaluator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.evaluation.FactCheckingEvaluator;
 import org.springframework.ai.chat.evaluation.RelevancyEvaluator;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.evaluation.EvaluationRequest;
 import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
@@ -17,17 +20,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+
 import static org.springframework.ai.model.ModelOptionsUtils.OBJECT_MAPPER;
 
 @Component
 public class ResponseHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseHelper.class);
+    private static RelevancyEvaluator evaluator;
+    private static FactCheckingEvaluator factCheckingEvaluator;
     @Autowired
     @Qualifier("openAiChatClientBuilder")
     private ChatClient.Builder openAiChatClientBuilder;
 
-    private static RelevancyEvaluator evaluator;
+    private static void logContextTrace(Object retrievedDocs) {
+        try {
+            logger.info("retrieved documents for the user query: {}",
+                    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(retrievedDocs));
+        } catch (JsonProcessingException e) {
+            logger.trace("documents for the user query: {}", retrievedDocs);
+            logger.error("JsonProcessingException", e);
+        }
+    }
 
     /**
      * Safely extract the assistant text from a ChatResponse.
@@ -57,26 +72,47 @@ public class ResponseHelper {
     /**
      * Implements RelevancyEvaluator
      */
-    protected EvaluationResponse getEvaluationResponse(
+    protected EvaluationResponse getRelevanceEvaluationResponse(
             final String message,
             final ChatResponse chatResponse,
             final GoogleGenAiChatModel chatModel) {
         EvaluationResponse evaluationResponse = null;
+
         if (chatResponse != null) {
             var retrievedDocs = chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
-            try {
-                logger.trace("retrieved documents for the user query: {}",
-                        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(retrievedDocs));
-            } catch (JsonProcessingException e) {
-                logger.trace("documents for the user query: {}", retrievedDocs);
-                logger.error("JsonProcessingException", e);
-            }
+            logContextTrace(retrievedDocs);
             EvaluationRequest evaluationRequest = new EvaluationRequest(
                     message,
                     chatResponse.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS),
                     chatResponse.getResult().getOutput().getText()
             );
             RelevancyEvaluator evaluator = new RelevancyEvaluator(openAiChatClientBuilder);
+            evaluationResponse = evaluator.evaluate(evaluationRequest);
+            logger.info("evaluation data: {}", evaluationResponse);
+        }
+        return evaluationResponse;
+    }
+
+    /**
+     * Implements GroundedRelevantEvaluator - a custom tailor made evaluator
+     */
+    protected EvaluationResponse getCustomEvaluation(
+            final String message,
+            final ChatResponse chatResponse) {
+        EvaluationResponse evaluationResponse = null;
+
+        if (chatResponse != null) {
+            List<Document> retrievedDocs = chatResponse.getMetadata()
+                    .get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
+
+            logContextTrace(retrievedDocs);
+
+            EvaluationRequest evaluationRequest = new EvaluationRequest(
+                    message, retrievedDocs, chatResponse.getResult().getOutput().getText()
+            );
+
+            GroundedRelevantEvaluator evaluator = new GroundedRelevantEvaluator
+                    (openAiChatClientBuilder);
             evaluationResponse = evaluator.evaluate(evaluationRequest);
             logger.info("evaluation data: {}", evaluationResponse);
         }
