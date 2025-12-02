@@ -3,6 +3,8 @@ package com.docintel.docintel.evaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvisor;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.evaluation.EvaluationRequest;
 import org.springframework.ai.evaluation.EvaluationResponse;
@@ -81,6 +83,13 @@ public class GroundedRelevantEvaluator implements Evaluator {
                     .build()
                     .prompt()
                     .user(userMessage)
+                    .advisors(
+                            StructuredOutputValidationAdvisor.builder()
+                                    .outputType(CustomEvaluationResponse.class)
+                                    .maxRepeatAttempts(3)
+                                    .advisorOrder(BaseAdvisor.HIGHEST_PRECEDENCE + 1000)
+                                    .build()
+                    )
                     .call()
                     .entity(CustomEvaluationResponse.class);
         } catch (Exception ex) {

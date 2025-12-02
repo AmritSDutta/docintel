@@ -36,7 +36,7 @@ public class ResponseHelper {
 
     private static void logContextTrace(Object retrievedDocs) {
         try {
-            logger.info("retrieved documents for the user query: {}",
+            logger.trace("retrieved documents for the user query: {}",
                     OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(retrievedDocs));
         } catch (JsonProcessingException e) {
             logger.trace("documents for the user query: {}", retrievedDocs);
