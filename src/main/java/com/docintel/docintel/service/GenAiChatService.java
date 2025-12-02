@@ -1,5 +1,6 @@
 package com.docintel.docintel.service;
 
+import com.docintel.docintel.evaluator.EvaluationRecursiveAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -57,6 +58,10 @@ public class GenAiChatService {
                 .user(message + "\nProvide references wherever available.")
                 .advisors(this.qaAdvisor)
                 .advisors(a -> a.param(CONVERSATION_ID, convId))
+                .advisors(new EvaluationRecursiveAdvisor(
+                        this.responseHelper.getRelevancyEvaluator(),
+                        2
+                ))
                 .call();
 
         ChatResponse chatResponse = responseHolder.chatResponse();

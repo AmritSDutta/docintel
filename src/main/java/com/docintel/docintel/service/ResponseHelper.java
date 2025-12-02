@@ -93,6 +93,10 @@ public class ResponseHelper {
         return evaluationResponse;
     }
 
+    protected RelevancyEvaluator getRelevancyEvaluator(){
+        return new RelevancyEvaluator(openAiChatClientBuilder);
+    }
+
     /**
      * Implements GroundedRelevantEvaluator - a custom tailor made evaluator
      */
