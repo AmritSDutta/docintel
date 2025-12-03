@@ -1,30 +1,43 @@
 # 📄 DocIntel-Lite for Spring AI (PDF-only edition)
 
-A compact **Spring Boot + Spring AI 1.1** microservice that ingests PDFs, extracts multimodal content with Gemini, embeds text, stores vectors in **Qdrant**, retrieves context, generates LLM answers, and auto-evaluates them with an LLM-as-judge.  
-*(Small, focused, and surprisingly sassy.)* 🤖✨
+## 🚀 Project Overview
+This project demonstrates an end-to-end **multimodal Retrieval-Augmented Generation (RAG)** pipeline built using **Spring AI 1.1**, **Google Gemini**, and **Qdrant**. It ingests PDFs, extracts structured multimodal content, embeds it, stores it in a vector database, retrieves relevant context, synthesizes answers, and performs groundedness evaluation.
 
----
+## 🔧 Key Features
+1. **Multimodal RAG Pipeline** — PDF ingest → Gemini extraction → embeddings → Qdrant indexing → retrieval → synthesis → evaluation.
+2. **Structured Extraction** — Gemini 2.5-Flash converts pages, tables, charts, and OCR blocks into strict JSON.
+3. **Vector Storage** — Google GenAI embeddings stored in Qdrant with metadata and HNSW indexing.
+4. **Spring AI Integration** — Chat models, advisors, evaluators, and vector store wired via Spring AI.
+5. **Configurable Retrieval** — Top-K similarity search feeding retrieved chunks into synthesis.
+6. **Custom Evaluation Layer** — GroundedRelevantEvaluator scores groundedness + relevance.
+7. **Deterministic Rules** — Threshold scoring, hallucination checks, provenance-aware evaluation.
+8. **Pipeline Transparency** — Full logging from ingest to evaluation for debugging and audits.
+9. **Further Exploration** — Vector quality monitoring, schema hardening, multi-PDF index, caching, cost-profiling.
+10. **High Showcase Value** — A compact blueprint for enterprise-grade multimodal RAG systems.
 
-## 🌟 Highlights
-- **PDF ingestion only** (tested)
-- Multimodal extraction via `gemini-2.5-flash-lite`
-- Embeddings with `text-embedding-004` (768-dim)
-- Vector store: **Qdrant** (via Spring AI auto-config)
-- Evaluation by `gpt-5-nano`
-- Retrieval → Generation → Evaluation (Relevancy + Fact-checking)
-- Grounded answers with page references
+## 🏗️ Architecture (Placeholder)
+```
+PDF → Gemini Extraction → Embeddings → Qdrant → Retrieval → Synthesis → Evaluation → Response
+```
 
----
+## 📦 Setup
+```bash
+git clone <repo-url>
+cd project
+mvn clean install
+```
 
-## 🏗️ Architecture (Spring-themed)
-### DocIntel-Lite Architecture
+## ▶️ Run
+```bash
+mvn spring-boot:run
+```
 
-Components (with Spring vibes):
-- **PDF Upload** → page-wise vision extraction (Gemini)
-- **Embedding** (text-embedding-004) → vectors stored in **Qdrant**
-- **Retrieval** via Spring AI VectorStore abstraction
-- **Generation** with Gemini; **Evaluation** with GPT-5-nano (LLM-as-Judge)
-- Telemetry: token usage, latency, evaluation scores
+## 📁 Project Structure
+```
+src/main/java/...    # Spring AI config, advisors, evaluators
+src/main/resources/   # application properties
+data/                 # embeddings, indexed chunks
+```
 
 ---
 
