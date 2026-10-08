@@ -1,0 +1,89 @@
+---
+title: Configuration & Deployment
+description: Configuration properties, environment variables, local Gradle setup, and Docker deployment.
+---
+
+# Configuration & Deployment
+
+DocIntel is designed as a reactive Spring Boot service configured via standard externalized configuration and environment variables.
+
+## Environment Variables
+
+| Variable | Description | Target Component |
+|---|---|---|
+| `GEMINI_API_KEY` | Google Generative AI API Key | Gemini 2.5 Flash, Gemini 2.0 Flash Lite, text-embedding-004 |
+| `OPENAI_API_KEY` | OpenAI API Key | GPT-5 Nano (Evaluators) |
+| `QDRANT_HOST` | Hostname or URL for Qdrant instance | Qdrant gRPC client |
+| `QDRANT_API_KEY` | API Key for Qdrant Cloud or protected cluster | Qdrant gRPC client |
+
+## Application Properties Breakdown
+
+Key application parameters defined in `src/main/resources/application.properties`:
+
+```properties
+spring.application.name=docintel
+spring.output.ansi.enabled=ALWAYS
+spring.main.allow-bean-definition-overriding=true
+
+# Google Gemini Models
+spring.ai.google.genai.api-key=${GEMINI_API_KEY}
+spring.ai.google.genai.embedding.api-key=${GEMINI_API_KEY}
+spring.ai.google.genai.chat.options.model=gemini-2.0-flash-lite
+
+# OpenAI Evaluator Model
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-5-nano
+
+# Qdrant Vector Store
+spring.ai.vectorstore.qdrant.host=${QDRANT_HOST}
+spring.ai.vectorstore.qdrant.port=6334
+spring.ai.vectorstore.qdrant.api-key=${QDRANT_API_KEY}
+spring.ai.vectorstore.qdrant.collection-name=multimodel_document_store
+spring.ai.vectorstore.qdrant.initialize-schema=true
+
+# Model Context Protocol (MCP) Client
+spring.ai.mcp.client.enabled=true
+spring.ai.mcp.client.type=ASYNC
+spring.ai.mcp.client.streamable-http.enabled=true
+spring.ai.mcp.client.streamable-http.connections.mcp_server.url=http://localhost:8001
+spring.ai.mcp.client.tool-callbacks-enabled=true
+
+# Actuator & Observability
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+spring.ai.metrics.enabled=true
+```
+
+## Running Locally with Gradle
+
+Requires **Java 21** or later.
+
+### Build and Run Tests
+```bash
+./gradlew clean test
+```
+
+### Run the Application
+```bash
+./gradlew bootRun
+```
+
+The application will bind to port `8080` by default.
+
+## Running with Docker
+
+Build the container image using the included Dockerfile:
+
+```bash
+docker build -t docintel .
+```
+
+Run the container passing required environment variables:
+
+```bash
+docker run -p 8080:8080 \
+  -e GEMINI_API_KEY="your-gemini-key" \
+  -e OPENAI_API_KEY="your-openai-key" \
+  -e QDRANT_HOST="your-qdrant-host" \
+  -e QDRANT_API_KEY="your-qdrant-key" \
+  docintel
+```

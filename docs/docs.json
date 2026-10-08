@@ -1,0 +1,26 @@
+{
+  "name": "DocIntel",
+  "theme": "maple",
+  "colors": {
+    "primary": "#009688",
+    "light": "#009688",
+    "dark": "#009688"
+  },
+  "filterSidebar": true,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": ["index", "configuration"]
+      },
+      {
+        "group": "Core Concepts",
+        "pages": ["architecture", "ingestion", "rag-pipeline", "evaluation"]
+      },
+      {
+        "group": "Reference",
+        "pages": ["api-reference"]
+      }
+    ]
+  }
+}

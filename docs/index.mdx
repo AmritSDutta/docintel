@@ -1,0 +1,63 @@
+---
+title: DocIntel Overview
+description: High-performance multimodal Retrieval-Augmented Generation (RAG) platform powered by Spring AI 1.1, Google Gemini, OpenAI, and Qdrant.
+---
+
+# DocIntel Overview
+
+DocIntel is an enterprise-grade multimodal Retrieval-Augmented Generation (RAG) system built with **Spring Boot 3.5.8** and **Spring AI 1.1.0**. It orchestrates multimodal PDF ingestion, structured content extraction, dense vector embeddings, hybrid chat pipelines, and automated groundedness and relevancy evaluation.
+
+## Key Capabilities
+
+- **Multimodal PDF Parsing**: Extracts structured text, tabular data in Markdown, image/chart captions, and raw JSON blocks directly via Google Gemini 2.5 Flash.
+- **Vector Search & Storage**: Embeds extracted document segments using Google GenAI `text-embedding-004` (768 dimensions) and indexes them in Qdrant with HNSW similarity search.
+- **Hybrid Chat Pipelines**: Provides both synchronous retrieval-augmented chat (`/ai/chat`) with session memory and reactive streaming chat (`/ai/reactive_chat`) with Model Context Protocol (MCP) tool integration.
+- **Automated Verification & Evaluation**: Enforces factual groundedness and query relevancy using dual evaluators (`RelevancyEvaluator` and a custom `GroundedRelevantEvaluator`) powered by OpenAI GPT-5 Nano.
+- **Recursive Query Refinement**: Employs an `EvaluationRecursiveAdvisor` to recursively re-prompt the LLM when an answer fails quality standards.
+
+## Project Structure
+
+<Tree>
+  <Tree.Folder name="src/main/java/com/docintel/docintel" defaultOpen>
+    <Tree.File name="DocintelApplication.java" highlight />
+    <Tree.Folder name="config" defaultOpen>
+      <Tree.File name="ChatConfig.java" highlight />
+      <Tree.File name="McpClientHandlers.java" />
+      <Tree.File name="SimpleRetryFailureListener.java" />
+      <Tree.File name="ToolVerifier.java" />
+    </Tree.Folder>
+    <Tree.Folder name="controller" defaultOpen>
+      <Tree.File name="GenAiChatController.java" highlight />
+      <Tree.File name="IngestController.java" highlight />
+    </Tree.Folder>
+    <Tree.Folder name="evaluator" defaultOpen>
+      <Tree.File name="EvaluationRecursiveAdvisor.java" highlight />
+      <Tree.File name="GroundedRelevantEvaluator.java" highlight />
+    </Tree.Folder>
+    <Tree.Folder name="service" defaultOpen>
+      <Tree.File name="GenAiChatService.java" highlight />
+      <Tree.File name="GenAiIMultiModalIngestionService.java" highlight />
+      <Tree.File name="PageExtraction.java" />
+      <Tree.File name="PdfService.java" />
+      <Tree.File name="ResponseHelper.java" />
+      <Tree.File name="SchemaBuildingHelper.java" />
+    </Tree.Folder>
+  </Tree.Folder>
+  <Tree.Folder name="src/main/resources">
+    <Tree.File name="application.properties" highlight />
+    <Tree.Folder name="prompts">
+      <Tree.File name="system.md" />
+    </Tree.Folder>
+  </Tree.Folder>
+  <Tree.File name="build.gradle" />
+  <Tree.File name="Dockerfile" />
+</Tree>
+
+## Quick Navigation
+
+- Explore the complete [Architecture](/architecture) and data flow diagrams.
+- Understand the [Multimodal Ingestion Pipeline](/ingestion) and structured schemas.
+- Discover the [RAG Pipeline](/rag-pipeline) and reactive MCP integration.
+- Review the [Evaluation Layer](/evaluation) with recursive prompt refinement.
+- Check [Configuration & Setup](/configuration) for deployment guidelines.
+- Browse the complete [API Reference](/api-reference).
