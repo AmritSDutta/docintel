@@ -24,15 +24,19 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-client-webflux'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.13'
+
+	//implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
 	implementation 'org.springframework.ai:spring-ai-starter-model-google-genai-embedding'
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+    //implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-qdrant'
     implementation 'org.springframework.ai:spring-ai-qdrant-store'
     implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
-
+    //implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.mockito:mockito-inline:5.2.0"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

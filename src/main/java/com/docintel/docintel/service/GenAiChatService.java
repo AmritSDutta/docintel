@@ -4,6 +4,7 @@ import com.docintel.docintel.evaluator.EvaluationRecursiveAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
@@ -11,9 +12,14 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.evaluation.EvaluationResponse;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
@@ -26,11 +32,14 @@ public class GenAiChatService {
     private final GoogleGenAiChatModel chatModel;
     private final ChatClient chatClient;
     private final QuestionAnswerAdvisor qaAdvisor;
+    private final ToolCallbackProvider mcpToolProvider;
+
 
     public GenAiChatService(GoogleGenAiChatModel chatModel, ChatMemory chatMemory,
                             String systemPrompt, ResponseHelper responseHelper, VectorStore vectorStore,
-                            SimpleLoggerAdvisor chatLoggerAdvisor) {
+                            SimpleLoggerAdvisor chatLoggerAdvisor, ToolCallbackProvider mcpToolProvider) {
         this.chatModel = chatModel;
+        this.mcpToolProvider = mcpToolProvider;
         logger.info("Chat initialized with model: {}, prompt: {}",
                 chatModel.getDefaultOptions().getModel(), systemPrompt);
         this.responseHelper = responseHelper;
@@ -72,5 +81,20 @@ public class GenAiChatService {
         logger.info("{}{}conversation Id:[{}]", text, System.lineSeparator(), convId);
         var ls = System.lineSeparator();
         return text + ls.repeat(2) + "Evaluation:" + ls + customEvaluation;
+    }
+
+    public Flux<ChatResponse> getRelevantInfoFromRagReactive(String message, String convId) {
+        return chatClient.prompt()
+                .system("""
+                    You are a helpful agent who uses tools to find answers.
+                    Use the available tools to gather information relevant to the user’s query.
+                    Search the document for matching content and return only verified findings.
+                    Synthesize tool results into a concise, factual answer without assumptions.
+                """)
+                .user(message)
+                .toolCallbacks(this.mcpToolProvider)
+                .advisors(a -> a.param("CONVERSATION_ID", convId))
+                .stream()
+                .chatResponse();
     }
 }

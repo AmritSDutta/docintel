@@ -1,0 +1,165 @@
+---
+title: API Reference
+description: Complete REST and reactive API endpoint specifications for DocIntel.
+---
+
+# API Reference
+
+DocIntel exposes HTTP REST endpoints for multimodal document ingestion, retrieval-augmented chat, session history, and system observability.
+
+## Ingestion Endpoints
+
+### Direct Multimodal PDF Ingestion
+
+Uploads a PDF document, executes Gemini 2.5 Flash multimodal extraction, translates pages into document chunks, and indexes them in Qdrant.
+
+- **Method**: `POST`
+- **Path**: `/ingest/pdf/genai`
+- **Content-Type**: `multipart/form-data`
+
+#### Request Parameters
+
+| Part | Type | Required | Description |
+|---|---|---|---|
+| `file` | Binary | Yes | The PDF file to ingest |
+
+#### Example Request
+
+```bash
+curl -X POST http://localhost:8080/ingest/pdf/genai \
+  -F "file=@sample-report.pdf"
+```
+
+#### Example Response (`200 OK`)
+
+```json
+[
+  {
+    "page_number": 1,
+    "extracted_tables": [
+      "| Metric | Q1 | Q2 |\n| --- | --- | --- |\n| Revenue | $10M | $12M |"
+    ],
+    "images": [
+      {
+        "caption": "Quarterly trend chart showing growth",
+        "source": "Chart Section 1"
+      }
+    ],
+    "json_blocks": [],
+    "text_content": "Company Quarterly Overview"
+  }
+]
+```
+
+---
+
+## Chat & RAG Endpoints
+
+### Synchronous RAG Chat
+
+Executes retrieval-augmented synthesis against the Qdrant document store with automatic recursive quality evaluation.
+
+- **Method**: `GET`
+- **Path**: `/ai/chat`
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `message` | string | Yes | — | The user query or question |
+| `conversationId` | string | No | `5z65c1d8` | Conversation session ID for memory tracking |
+
+#### Example Request
+
+```bash
+curl -G http://localhost:8080/ai/chat \
+  --data-urlencode "message=What were the Q2 revenue figures?" \
+  --data-urlencode "conversationId=session-101"
+```
+
+#### Example Response (`200 OK`)
+
+```text
+Response:
+According to the quarterly report, Q2 revenue was $12M.
+References: Page 1
+
+Evaluation:
+EvaluationResponse{pass=true, score=1.0, feedback='Directly answered and fully grounded.', metadata={}}
+
+[Conversation Id]: session-101
+```
+
+---
+
+### Reactive MCP Streaming Chat
+
+Executes non-blocking reactive synthesis augmented with dynamically resolved tools from the Model Context Protocol (MCP) server.
+
+- **Method**: `GET`
+- **Path**: `/ai/reactive_chat`
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `message` | string | Yes | — | The user query to execute |
+| `conversationId` | string | No | `5z65c1d8` | Conversation session ID |
+
+#### Example Request
+
+```bash
+curl -G http://localhost:8080/ai/reactive_chat \
+  --data-urlencode "message=Find cross-reference tools and verify report stats"
+```
+
+---
+
+### Conversation History
+
+Retrieves the active message history for a specified session ID from `MessageWindowChatMemory`.
+
+- **Method**: `GET`
+- **Path**: `/ai/history`
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `conversationId` | string | Yes | Conversation session ID |
+
+#### Example Request
+
+```bash
+curl "http://localhost:8080/ai/history?conversationId=session-101"
+```
+
+---
+
+### Clear Conversation Memory
+
+Clears all stored dialogue context for a given session.
+
+- **Method**: `DELETE`
+- **Path**: `/ai/cleanse`
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `conversationId` | string | Yes | Conversation session ID to clear |
+
+#### Example Request
+
+```bash
+curl -X DELETE "http://localhost:8080/ai/cleanse?conversationId=session-101"
+```
+
+---
+
+## Observability & Documentation Endpoints
+
+- **Spring Actuator Health**: `GET /actuator/health`
+- **Prometheus Metrics**: `GET /actuator/prometheus`
+- **Spring AI Metrics**: `GET /actuator/metrics`
+- **Swagger / OpenAPI UI**: `GET /swagger-ui.html`

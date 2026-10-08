@@ -60,6 +60,7 @@ public class EvaluationRecursiveAdvisor implements CallAdvisor {
                 .orElse(null);
 
         if (questionAnswerAdvisor == null) {
+            System.out.println();
             logger.info("QuestionAnswerAdvisor not found in advisor chain, hence this advisor is ineffective");
             return callAdvisorChain.copy(this).nextCall(processedChatClientRequest);
         }
